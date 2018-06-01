@@ -570,7 +570,7 @@ if __name__ == '__main__':
         ]
     else:
         PROJECT_EXCLUDES = []
-    PROJECT_ROOT = op.join(SCRIPT_PATH, PROJECT_NAME + 'Project')
+    PROJECT_ROOT = op.join(SCRIPT_PATH, '..', PROJECT_NAME + 'Project')
 
     if CONFIG_PARSER.has_section('logging'):
         logging.basicConfig(**CONFIG_PARSER['logging'])

@@ -560,7 +560,7 @@ def build_main(args, mappings, build):
 if __name__ == '__main__':
     CONFIG_PATH = op.abspath(op.dirname(__file__))
     CONFIG_PARSER = configparser.ConfigParser()
-    CONFIG_PARSER.read(op.join(CONFIG_PATH, 'build.ini'))
+    CONFIG_PARSER.read(op.join(CONFIG_PATH, '..', 'build.ini'))
 
     PROJECT_NAME = CONFIG_PARSER['project']['name']
     PROJECT_PREFIX = CONFIG_PARSER['project']['prefix']

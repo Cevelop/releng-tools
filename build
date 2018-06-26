@@ -510,6 +510,7 @@ def get_base_command(args, excluded_modules):
         '-Dgitflow.branch=%s' % get_enabled_git_flow_branch(),
         '-fae' if not args.fail_fast else '',
         '' if not args.threads else '-T %s' % args.threads,
+        '-e',
     ]
 
 

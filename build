@@ -168,6 +168,15 @@ class Module:
     def __repr__(self):
         return f"{self._kind} ({self._packaging}): {self.artifact_id}"
 
+    def __eq__(self, other: "Module") -> bool:
+        return self.artifact_id == other.artifact_id
+
+    def __eq__(self, artifact_id: string) -> bool:
+        return self.artifact_id == artifact_id
+
+    def __hash__(self):
+        return hash(self.artifact_id)
+
 
 def name_from_id(artifact_id):
     """Convert an artifact ID into a friendly name."""
@@ -200,7 +209,8 @@ def scan_module(root, name):
     scanned = Module(artifact_id, name, [], path, pom_path, packaging)
 
     for mod in pom.iterfind('.//pom:module', namespaces=POM_NAMESPACES):
-        scanned.modules.append(scan_module(path, mod.text))
+        if mod.text not in scanned.modules:
+            scanned.modules.append(scan_module(path, mod.text))
 
     return scanned
 
@@ -219,7 +229,8 @@ def scan_project():
                     packaging)
 
     for mod in pom.iterfind('.//pom:module', namespaces=POM_NAMESPACES):
-        module.modules.append(scan_module(PROJECT_ROOT, mod.text))
+        if mod.text not in module.modules:
+            module.modules.append(scan_module(PROJECT_ROOT, mod.text))
 
     return module
 
@@ -420,13 +431,9 @@ def select(patterns, kind, tree, mappings):
     """Select the given patterns of the given kind from the given tree"""
     mapping_id = PROJECT_PREFIX + '.' + mappings[kind]
     subtree = tree.find_by_id(mapping_id)
-    modules = [m for m in subtree if m.artifact_id != mapping_id]
     if 'all' in patterns:
-        return modules
-    selected = []
-    for pattern in patterns:
-        selected.extend(subtree.find(pattern))
-    return selected
+        return {m for m in subtree if m.artifact_id != mapping_id}
+    return {subtree.find(pattern) for pattern in patterns}
 
 
 def select_modules(args, mappings, tree):
@@ -439,14 +446,22 @@ def select_modules(args, mappings, tree):
         result = select(args.features, 'features', tree, mappings)
     else:
         prefix = PROJECT_PREFIX
-        result = [m for m in tree
-                  if m.artifact_id != prefix + '.' + mappings['root']
-                  and m.artifact_id != prefix + '.' + mappings['tests']
-                  and m.artifact_id != prefix + '.' + mappings['bundles']
-                  and m.artifact_id != prefix + '.' + mappings['features']
-                  and m.artifact_id != prefix + '.' + mappings['releng']]
-    return set(result)
-
+        result = {m for m in tree
+                if m.artifact_id != \
+                        f"{prefix}.{mappings.get('root','root')}"
+                and m.artifact_id != \
+                        f"{prefix}.{mappings.get('tests','tests')}"
+                and m.artifact_id != \
+                        f"{prefix}.{mappings.get('bundles','bundles')}"
+                and m.artifact_id != \
+                        f"{prefix}.{mappings.get('features','features')}"
+                and m.artifact_id != \
+                        f"{prefix}.{mappings.get('releng','releng')}"
+                and m.artifact_id != \
+                        f"{prefix}.{mappings.get('helps','helps')}"
+                and m.artifact_id != \
+                        f"{prefix}.{mappings.get('examples','examples')}"}
+    return result
 
 def get_excluded_modules(tree, selected_modules):
     """Get all modules that are excluded from the build"""
@@ -535,12 +550,10 @@ def build_main(args, mappings, build):
             LOGGER.info('      \u2514\u2500\u2500\u2192 %s', dep.name)
 
     excluded_modules = get_excluded_modules(tree, selected_modules)
-    for mapping in mappings:
-        excluded_modules.remove(
-            tree.find_by_id(
-                PROJECT_PREFIX + '.' + mappings[mapping]
-            )
-        )
+    for value in (value for key, value in mappings.items() if value):
+        to_remove = tree.find_by_id(f"{PROJECT_PREFIX}.{value}")
+        if to_remove:
+            excluded_modules.remove(to_remove)
 
     if not excluded_modules:
         LOGGER.info('No modules were excluded from the build')

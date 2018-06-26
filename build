@@ -433,7 +433,7 @@ def select(patterns, kind, tree, mappings):
     subtree = tree.find_by_id(mapping_id)
     if 'all' in patterns:
         return {m for m in subtree if m.artifact_id != mapping_id}
-    return {subtree.find(pattern) for pattern in patterns}
+    return {module for pattern in patterns for module in subtree.find(pattern)}
 
 
 def select_modules(args, mappings, tree):

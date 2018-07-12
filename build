@@ -16,6 +16,7 @@ import argparse
 import configparser
 import logging
 import os.path as op
+from os import environ as env
 import re
 import string
 import sys
@@ -494,8 +495,11 @@ def skip_string(excluded_modules):
 def get_enabled_git_flow_branch():
     """Determine wich 'git-flow' branch should be considered active"""
     command = ' '.join(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
-    branch = subprocess.check_output(command, shell=True,
-                                     universal_newlines=True)
+    if env.get('CI_COMMIT_REF_NAME'):
+        branch = env.get('CI_COMMIT_REF_NAME')
+    else:
+        branch = subprocess.check_output(command, shell=True,
+                                         universal_newlines=True)
     if branch == 'master' or branch.startswith('release/'):
         return 'master'
     else:

@@ -493,10 +493,13 @@ def skip_string(excluded_modules):
 
 def get_enabled_git_flow_branch():
     """Determine wich 'git-flow' branch should be considered active"""
-    command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
-    get_branch_proc = subprocess.run(command, stderr=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, shell=True)
-    return 'master' if str(get_branch_proc.stdout) == 'master' else 'develop'
+    command = ' '.join(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+    branch = subprocess.check_output(command, shell=True,
+                                     universal_newlines=True)
+    if branch == 'master' or branch.startswith('release/'):
+        return 'master'
+    else:
+        return 'develop'
 
 
 def get_disabled_git_flow_branch():

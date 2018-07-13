@@ -95,7 +95,7 @@ echo "Deploying updatesite to '${P2_HOST}'..."
 scp -r ${P2_SOURCE}/* ${P2_USER}@${P2_HOST}:${P2_ROOT}/${P2_DESTINATION}
 
 if [[ "$P2_ENABLE_COMPOSITE" == "1" ]]; then
-  echo "Compiling composite updatesite '${P2_COMPOSITE_NAME}:${P2_COMPOSITE_VBERSION}'..."
+  echo "Compiling composite updatesite '${P2_COMPOSITE_NAME}:${P2_COMPOSITE_VERSION}'..."
   ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && compile-composite-updatesite '${P2_COMPOSITE_NAME}' '${P2_COMPOSITE_VERSION}'"
 else
   echo "Creating 'latest' symlink"

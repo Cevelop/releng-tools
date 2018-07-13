@@ -89,11 +89,15 @@ if [[ "${P2_DESTINATION}" == "P2_USE_REL_TAG" ]]; then
 fi
 
 echo "Creating destination directory on '${P2_HOST}'..."
-ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && mkdir -p ${P2_DESTINATION} && ln -sfTv ${P2_DESTINATION} latest"
+ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && mkdir -p ${P2_DESTINATION}"
 
 echo "Deploying updatesite to '${P2_HOST}'..."
 scp -r ${P2_SOURCE}/* ${P2_USER}@${P2_HOST}:${P2_ROOT}/${P2_DESTINATION}
 
 if [[ "$P2_ENABLE_COMPOSITE" == "1" ]]; then
-  ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT}/${P2_DESTINATION} && compile-composite-updatesite ${P2_COMPOSITE_NAME} ${P2_COMPOSITE_VERSION}"
+  echo "Compiling composite updatesite '${P2_COMPOSITE_NAME}:${P2_COMPOSITE_VBERSION}'..."
+  ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && compile-composite-updatesite '${P2_COMPOSITE_NAME}' '${P2_COMPOSITE_VERSION}'"
+else
+  echo "Creating 'latest' symlink"
+  ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && ln -sfTv ${P2_DESTINATION} latest"
 fi

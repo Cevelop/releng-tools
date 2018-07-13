@@ -39,6 +39,11 @@
 #   release tag deployment identifiers are activated but no pattern is
 #   provided, this variable defaults to "v[0-9]*.[0-9]*.0".
 #
+# - P2_ENABLE_COMPOSITE, P2_COMPOSITE_NAME, P2_COMPOSITE_VERSION
+#   P2_ENABLE_COMPOSITE is used to enable compilation of a composite update
+#   site on the remote host. If enabled (e.g. set to 1), P2_COMPOSITE_NAME and
+#   P2_COMPOSITE_VERSION have to be set accordingly.
+#
 # ============================================================================
 
 
@@ -53,6 +58,10 @@ if [[ -z "$P2_ROOT" ]]; then echo "Missing P2_ROOT!"; exit 1; fi
 if [[ -z "$P2_SOURCE" ]]; then echo "Missing P2_SOURCE!"; exit 1; fi
 if [[ -z "$P2_USER" ]]; then echo "Missing P2_USER!"; exit 1; fi
 
+if [[ "$P2_ENABLE_COMPOSITE" == "1" ]]; then
+  if [[ -z "$P2_COMPOSITE_NAME" ]]; then echo "Missing P2_COMPOSITE_NAME!"; exit 1; fi
+  if [[ -z "$P2_COMPOSITE_VERSION" ]]; then echo "Missing P2_COMPOSITE_VERSION!"; exit 1; fi
+fi
 
 if [[ -f /.dockerenv ]]; then
   echo "Detected Docker environment"
@@ -84,3 +93,7 @@ ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && mkdir -p ${P2_DESTINATION} && ln -sf
 
 echo "Deploying updatesite to '${P2_HOST}'..."
 scp -r ${P2_SOURCE}/* ${P2_USER}@${P2_HOST}:${P2_ROOT}/${P2_DESTINATION}
+
+if [[ "$P2_ENABLE_COMPOSITE" == "1" ]]; then
+  ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT}/${P2_DESTINATION} && compile-composite-updatesite ${P2_COMPOSITE_NAME} ${P2_COMPOSITE_VERSION}"
+fi

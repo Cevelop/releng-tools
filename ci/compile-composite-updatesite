@@ -38,10 +38,19 @@ def generate(name, type, version):
         'value': str(int(time())),
     }))
 
+    number_of_additional_children = 0
+    if os.path.isfile(".additionalChildren"):
+    	with open('.additionalChildren') as additional_children:
+    	    children = repo.find('children')
+    	    for entry in additional_children:
+    	        children.append(ET.Element('child', {'location': entry.strip()}))
+    	        number_of_additional_children += 1
+            
+
     directories = [file for file in os.listdir() if os.path.isdir(file)]
     if directories:
         children = repo.find('children')
-        children.attrib['size'] = str(len(directories))
+        children.attrib['size'] = str(len(directories) + number_of_additional_children)
         for entry in directories:
             children.append(ET.Element('child', {'location': entry}))
 

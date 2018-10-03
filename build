@@ -585,7 +585,7 @@ def build_main(args, mappings, build):
             LOGGER.info('   \u2514\u2500\u2500\u2192 %s', mod.name)
 
     base_command = get_base_command(args, excluded_modules)
-    if not args.javadoc:
+    if not args.javadoc_only:
         base_command.extend(args.goals)
     else:
         LOGGER.info('Only generating Javadoc')

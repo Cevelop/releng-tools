@@ -412,6 +412,13 @@ def parse_arguments():
         help='Abort the build on the fist failure'
     )
     parser.add_argument(
+        '-J',
+        '--javadoc-only',
+        default=False,
+        action='store_true',
+        help='Generate only the Javadoc for this project'
+    )
+    parser.add_argument(
         '-O',
         '--offline',
         default=False,
@@ -578,7 +585,12 @@ def build_main(args, mappings, build):
             LOGGER.info('   \u2514\u2500\u2500\u2192 %s', mod.name)
 
     base_command = get_base_command(args, excluded_modules)
-    base_command.extend(args.goals)
+    if not args.javadoc:
+        base_command.extend(args.goals)
+    else:
+        LOGGER.info('Only generating Javadoc')
+        base_command.extend(['clean', 'package', 'javadoc:javadoc'])
+
     command = ' '.join(base_command)
     if args.print_command:
         LOGGER.info('Executing the following build command: %s', command)

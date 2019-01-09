@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# ============================================================================
+#                         Plug-in updatesite nesting helper
+# ============================================================================
+#
+# Required Environment Variables
+# ------------------------------
+#
+# - P2_HOST
+#   The target deployment server
+#
+# - P2_HOST_KEY
+#   The public key of the target deployment server
+#
+# - P2_PRIVATE_KEY
+#   The private key to access the target deployment server
+#
+# - P2_ROOT_TOP
+#   The top-level root path of the update sites
+#
+# - P2_USER
+#   The user to log in as on the target deployment server
+#
+# ============================================================================
+
+
+# Yes, we forcefully disable tracing
+set +x
+
+if [[ -z "$P2_HOST" ]]; then echo "Missing P2_HOST!"; exit 1; fi
+if [[ -z "$P2_HOST_KEY" ]]; then echo "Missing P2_HOST_KEY!"; exit 1; fi
+if [[ -z "$P2_PRIVATE_KEY" ]]; then echo "Missing P2_PRIVATE_KEY!"; exit 1; fi
+if [[ -z "$P2_ROOT_TOP" ]]; then echo "Missing P2_ROOT_TOP!"; exit 1; fi
+if [[ -z "$P2_USER" ]]; then echo "Missing P2_USER!"; exit 1; fi
+
+if [[ -f /.dockerenv ]]; then
+  echo "Detected Docker environment"
+  echo "Registering remote host key for '${P2_HOST}' ..."
+  mkdir -p ~/.ssh
+  echo "${P2_HOST_KEY}" > ~/.ssh/known_hosts
+else
+  echo "No Docker environment detected."
+  exit 1
+fi
+
+echo "Starting ssh agent ..."
+eval $(ssh-agent -s)
+
+echo "Loading deployment key ..."
+echo "${P2_PRIVATE_KEY}" | ssh-add -
+
+echo "Compiling top-level composite updatesite '${P2_COMPOSITE_NAME}:${P2_COMPOSITE_VERSION}'..."
+ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT_TOP} && compile-composite-updatesite '${P2_COMPOSITE_NAME}' '${P2_COMPOSITE_VERSION}'"

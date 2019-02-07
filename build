@@ -169,11 +169,13 @@ class Module:
     def __repr__(self):
         return f"{self._kind} ({self._packaging}): {self.artifact_id}"
 
-    def __eq__(self, other: "Module") -> bool:
-        return self.artifact_id == other.artifact_id
-
-    def __eq__(self, artifact_id: string) -> bool:
-        return self.artifact_id == artifact_id
+    def __eq__(self, module) -> bool:
+        if isinstance(module, Module):
+            return self.artifact_id == module.artifact_id
+        elif isinstance(module, str):
+            return self.artifact_id == module
+        else:
+            raise TypeError('Unexpected type %s in comparison' % type(module))
 
     def __hash__(self):
         return hash(self.artifact_id)
@@ -462,21 +464,22 @@ def select_modules(args, mappings, tree):
     else:
         prefix = PROJECT_PREFIX
         result = {m for m in tree
-                if m.artifact_id != \
-                        f"{prefix}.{mappings.get('root','root')}"
-                and m.artifact_id != \
-                        f"{prefix}.{mappings.get('tests','tests')}"
-                and m.artifact_id != \
-                        f"{prefix}.{mappings.get('bundles','bundles')}"
-                and m.artifact_id != \
-                        f"{prefix}.{mappings.get('features','features')}"
-                and m.artifact_id != \
-                        f"{prefix}.{mappings.get('releng','releng')}"
-                and m.artifact_id != \
-                        f"{prefix}.{mappings.get('helps','helps')}"
-                and m.artifact_id != \
-                        f"{prefix}.{mappings.get('examples','examples')}"}
+                  if m.artifact_id !=
+                  f"{prefix}.{mappings.get('root','root')}"
+                  and m.artifact_id !=
+                  f"{prefix}.{mappings.get('tests','tests')}"
+                  and m.artifact_id !=
+                  f"{prefix}.{mappings.get('bundles','bundles')}"
+                  and m.artifact_id !=
+                  f"{prefix}.{mappings.get('features','features')}"
+                  and m.artifact_id !=
+                  f"{prefix}.{mappings.get('releng','releng')}"
+                  and m.artifact_id !=
+                  f"{prefix}.{mappings.get('helps','helps')}"
+                  and m.artifact_id !=
+                  f"{prefix}.{mappings.get('examples','examples')}"}
     return result
+
 
 def get_excluded_modules(tree, selected_modules):
     """Get all modules that are excluded from the build"""
@@ -507,7 +510,9 @@ def get_enabled_git_flow_branch():
     else:
         branch = subprocess.check_output(command, shell=True,
                                          universal_newlines=True)
-    if branch == 'master' or branch.startswith('release/'):
+    if branch == 'master' \
+            or branch.startswith('release/') \
+            or branch.startswith('hotfix/'):
         return 'master'
     else:
         return 'develop'

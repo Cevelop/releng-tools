@@ -528,7 +528,7 @@ def get_base_command(args, excluded_modules):
     """Get the base command for the build"""
     return [
         'mvn',
-        '-B',
+        '-B' if not sys.stdout.isatty() else '',
         '-o' if args.offline else '',
         '-f %s' % op.join(PROJECT_ROOT, POM_FILENAME),
         '-pl \'%s\'' % skip_string(excluded_modules),

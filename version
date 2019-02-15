@@ -9,4 +9,4 @@ NEW_VERSION=${1%%-SNAPSHOT}
 
 echo "Updating version to ${NEW_VERSION}-SNAPSHOT"
 
-mvn -f *Project/pom.xml tycho-versions:set-version -DnewVersion=${NEW_VERSION}-SNAPSHOT
+mvn -f *Project/pom.xml tycho-versions:set-version -Dgitflow.branch=master -DnewVersion=${NEW_VERSION}-SNAPSHOT

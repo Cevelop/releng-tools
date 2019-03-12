@@ -42,7 +42,7 @@ class UnresolvedDependencyError(Exception):
             'Cannot resolve depdency of \'%s\' (%s) on \'%s\' (%s)' % (
                 module.name,
                 module.artifact_id,
-                name_from_id(dependency),
+                name_from_id(dependency) if dependency else "None",
                 dependency,
             )
         )

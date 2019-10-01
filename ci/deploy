@@ -89,7 +89,7 @@ if [[ "${P2_DESTINATION}" == "P2_USE_REL_TAG" ]]; then
 fi
 
 echo "Creating destination directory on '${P2_HOST}'..."
-ssh ${P2_USER}@${P2_HOST} "cd ${P2_ROOT} && mkdir -p ${P2_DESTINATION}"
+ssh ${P2_USER}@${P2_HOST} "mkdir -p ${P2_ROOT}/${P2_DESTINATION}"
 
 echo "Deploying updatesite to '${P2_HOST}'..."
 scp -r ${P2_SOURCE}/* ${P2_USER}@${P2_HOST}:${P2_ROOT}/${P2_DESTINATION}

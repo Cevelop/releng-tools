@@ -531,7 +531,7 @@ def get_base_command(args, excluded_modules):
         '-B' if not sys.stdout.isatty() else '',
         '-o' if args.offline else '',
         '-f %s' % op.join(PROJECT_ROOT, POM_FILENAME),
-        '-pl \'%s\'' % skip_string(excluded_modules),
+        '-pl "%s"' % skip_string(excluded_modules),
         '-Djarsigner.skip=%s' % ('false' if args.sign else 'true'),
         '-Dgitflow.branch=%s' % get_enabled_git_flow_branch(),
         '-fae' if not args.fail_fast else '',

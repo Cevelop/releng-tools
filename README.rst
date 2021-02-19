@@ -1,6 +1,6 @@
-###########
-SLOTH Tools
-###########
+############
+Releng Tools
+############
 
 This repository provides a set of non-IDE tools to support developers help in
 the plug-in development workflow. If you need one of those tools, please feel
